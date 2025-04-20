@@ -16,7 +16,7 @@ from utils.training_utils import evaluate_model, predict_test, train_model
 
 # シード固定
 set_seed(42)
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("mps" if torch.backends.mps.is_available() else "cuda" if torch.cuda.is_available() else "cpu")
 print("Using device:", device)
 
 # 前処理

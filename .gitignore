@@ -174,3 +174,8 @@ cython_debug/
 .pypirc
 
 .DS_Store
+
+data/*
+ocr_env/*
+checktpoints/*
+Real-ESRGAN/*
