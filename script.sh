@@ -14,7 +14,7 @@ else
     echo "📁 Real-ESRGAN already exists. Skipping clone."
 fi
 
-cd Real-ESRGAN
+
 
 # Step 2: Install required packages
 echo "📦 Installing Python dependencies into ocr_env..."

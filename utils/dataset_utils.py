@@ -41,7 +41,7 @@ class ImageLabelDataset(Dataset):
             transforms.ToTensor(),
         ])
         self.with_label = with_label
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = torch.device("cuda")
 
         model = RRDBNet(num_in_ch=3, num_out_ch=3, num_feat=64,
                         num_block=23, num_grow_ch=32, scale=4)

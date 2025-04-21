@@ -16,7 +16,7 @@ from utils.training_utils import evaluate_model, predict_test, train_model
 
 # シード固定
 set_seed(42)
-device = torch.device("mps" if torch.backends.mps.is_available() else "cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda")
 print("Using device:", device)
 
 # 前処理
@@ -28,7 +28,7 @@ transform = transforms.Compose(
 )
 
 # データ読み込み
-full_dataset = ImageLabelDataset("data/train/low", transform=transform, with_label=True)
+full_dataset = ImageLabelDataset("data/train/train/low", transform=transform, with_label=True)
 labels = [full_dataset[i][1] for i in range(len(full_dataset))]
 
 # データ分割
