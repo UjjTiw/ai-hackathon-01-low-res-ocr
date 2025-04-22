@@ -5,7 +5,7 @@ import pandas as pd
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from models.simple_cnn import SimpleCNN
+from models.simple_cnn import EfficientNetCustom
 from sklearn.model_selection import StratifiedShuffleSplit
 from torch.utils.data import DataLoader, Subset
 from torchsummary import summary
@@ -41,7 +41,7 @@ train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
 val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False)
 
 # モデルとオプティマイザ
-model = SimpleCNN(num_classes=len(LABELS)).to(device)
+model = EfficientNetCustom(num_classes=len(LABELS)).to(device)
 summary(model, input_size=(1, 128, 128))
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=0.001)
