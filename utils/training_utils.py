@@ -52,15 +52,51 @@ def evaluate_model(model, loader, device, criterion=None):
 
 
 def predict_test(model, loader, device):
-    model.eval()
-    results = []
+    """
+    Predict using either a single model or an ensemble of models
+    """
+    if hasattr(model, '__iter__'):  # Check if model is iterable (list/tuple)
+        # It's an ensemble
+        return predict_test_ensemble(model, loader, device)
+    else:
+        # It's a single model
+        model.eval()
+        results = []
 
+        with torch.no_grad():
+            for imgs, filenames in loader:
+                imgs = imgs.to(device)
+                outputs = model(imgs)
+                preds = torch.argmax(outputs, dim=1).cpu().numpy()
+                labels = [idx_to_label[p] for p in preds]
+                results.extend(zip(filenames, labels))
+
+        return results
+
+def predict_test_ensemble(models, loader, device):
+    """
+    Ensemble prediction using multiple models
+    """
+    results = []
+    
     with torch.no_grad():
         for imgs, filenames in loader:
             imgs = imgs.to(device)
-            outputs = model(imgs)
-            preds = torch.argmax(outputs, dim=1).cpu().numpy()
+            
+            # Get predictions from all models
+            batch_predictions = []
+            for model in models:
+                model.eval()
+                outputs = model(imgs)
+                # Store logits, not class predictions
+                batch_predictions.append(outputs)
+            
+            # Average the logits from all models
+            ensemble_outputs = torch.mean(torch.stack(batch_predictions), dim=0)
+            preds = torch.argmax(ensemble_outputs, dim=1).cpu().numpy()
+            
+            # Convert to labels
             labels = [idx_to_label[p] for p in preds]
-            results.extend(zip(filenames, labels, strict=False))
-
+            results.extend(zip(filenames, labels))
+    
     return results

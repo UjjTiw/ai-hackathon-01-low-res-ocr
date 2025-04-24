@@ -4,7 +4,7 @@ import random
 import unicodedata
 import numpy as np
 import torch
-from PIL import Image
+from PIL import Image, ImageOps, ImageEnhance, ImageFilter
 from torch.utils.data import Dataset
 from torchvision import transforms
 from tqdm import tqdm
@@ -61,40 +61,49 @@ class ImageLabelDataset(Dataset):
         for path in tqdm(self.image_paths, desc="Upscaling images"):
             self._preprocess_image(path)
 
+    # In dataset_utils.py
     def _preprocess_image(self, path):
-        """Upscale a single image and store the result"""
-        print(f"Starting to process {path}")
         try:
-            print("  Opening image...")
             img = Image.open(path).convert("RGB")
-            print("  Converting to numpy array...")
             img_np = np.array(img)
-            print("  Calling upsampler.enhance...")
+            
+            # Add image enhancement before upscaling
+            from PIL import ImageEnhance, ImageFilter
+            img = Image.fromarray(img_np)
+            # Enhance contrast
+            enhancer = ImageEnhance.Contrast(img)
+            img = enhancer.enhance(1.5)
+            # Sharpen edges - helpful for text recognition
+            img = img.filter(ImageFilter.SHARPEN)
+            img_np = np.array(img)
+            
             output, _ = self.upsampler.enhance(img_np, outscale=1)
-            print("  Converting back to PIL Image...")
             self.processed_images[path] = Image.fromarray(output)
-            print(f"  Successfully processed {path}")
         except Exception as e:
             print(f"ERROR: Upscaling failed for {path}: {e}")
-            print("  Falling back to original image")
-            self.processed_images[path] = Image.open(path).convert("RGB")  # Use original
-
+            self.processed_images[path] = Image.open(path).convert("RGB")
     def __len__(self):
         return len(self.image_paths)
 
+    # In dataset_utils.py - update ImageLabelDataset.__getitem__
     def __getitem__(self, idx):
         path = self.image_paths[idx]
         
         # Use the pre-processed image
         img = self.processed_images[path]
         
-        # Convert to grayscale (1 channel)
+        # Convert to grayscale and enhance text visibility
         img = img.convert("L")
+        
+        # Text enhancement for character recognition
+        img = ImageOps.autocontrast(img, cutoff=2)
+        
         img = self.transform(img)
 
         if self.with_label:
             filename = os.path.basename(path)
             try:
+                # Normalize Japanese text properly
                 label_name = unicodedata.normalize("NFC", filename.split("_")[0])
                 label = label_to_idx[label_name]
             except (IndexError, KeyError):
