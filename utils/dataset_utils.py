@@ -47,7 +47,7 @@ class ImageLabelDataset(Dataset):
                         num_block=23, num_grow_ch=32, scale=4)
         self.upsampler = RealESRGANer(
             scale=4,
-            model_path='Real-ESRGAN/weights/RealESRGAN_x4plus.pth',  # Make sure this exists
+            model_path='Real-ESRGAN/weights/net_g_10000.pth',  # Make sure this exists
             model=model,
             tile=0,
             tile_pad=10,

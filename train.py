@@ -48,7 +48,7 @@ optimizer = optim.Adam(model.parameters(), lr=0.001)
 
 
 # 学習ループ
-for epoch in range(10):
+for epoch in range(20):
     print(f"\nEpoch {epoch + 1}")
     train_model(model, train_loader, criterion, optimizer, device)
     print("Validation...")
